@@ -13,12 +13,12 @@ public class GameController : MonoBehaviour {
     // Assigned in editor
 	public GameObject daydeck; public GameObject daydeckclone;
 	public GameObject nightdeck;
-	public GameObject cookbutton; public GameObject cookbuttonclone;
-	public GameObject stickbutton; public GameObject stickbuttonclone;
 	public Canvas maintextcanvas;
 	public Canvas canvasclone;
 	Text cookButtonText;
 	Text stickButtonText;
+	Text scoreText;
+	Text cardDisplayText;
 	Text handText;
 	DealScript dealScript;
 	DealScript nightScript;
@@ -35,16 +35,16 @@ public class GameController : MonoBehaviour {
 	public float forestSpacing;         // Spacing of cards in forest, hand, and decay
 	public float handSpacing;
 	public float decaySpacing;
-	public int score;
 	public int basketCount;             // Counts number of baskets played
 	public int panCount;                // Counts number of pans played (starts at 1)
 	public int handLimit;               // Tracks cards allowed in hand
 	public int stickCount;              // Counts number of sticks in player's possession
 
-	// Lists (Hand, Forest, Decay)
+	// Lists (Hand, Forest, Decay, Selected Cards)
 	public List<GameObject> Hand;
 	public List<GameObject> Forest;
 	public List<GameObject> Decay;
+	public List<GameObject> SelectedCards;
 
 	// Player-specific variables (never accessed outside of GameController - only used as storage)
 	public List<GameObject> Hand1;
@@ -76,7 +76,8 @@ public class GameController : MonoBehaviour {
 			// Initialize card lists
 			Hand1 = new List<GameObject>(); Hand2 = new List<GameObject>();
 			Forest = new List<GameObject>(); Decay = new List<GameObject>();
-			Hand1.Clear(); Hand2.Clear(); Forest.Clear(); Decay.Clear();
+			SelectedCards = new List<GameObject>();
+			Hand1.Clear(); Hand2.Clear(); Forest.Clear(); Decay.Clear(); SelectedCards.Clear();
             
 			// Initialize variables
 			turn = true;
@@ -87,8 +88,7 @@ public class GameController : MonoBehaviour {
 			stickCount1 = 0; stickCount2 = 0;
 
 			// Set up variables such that Player 1 starts by default
-			Hand = Hand1; basketCount = basketCount1; panCount = panCount1; 
-			handLimit = handLimit1; stickCount = stickCount1; score = score1;
+			SwitchPlayer("Player1");
 
 			// Instantiate a day-deck, shuffle the deck and deal the initial hand.
 			daydeckclone = Instantiate(daydeck, daydeck.transform.position, Quaternion.identity);
@@ -103,14 +103,16 @@ public class GameController : MonoBehaviour {
 			nightScript.Shuffle();
 
 			// Instantiate buttons and text
-			canvasclone = Instantiate(maintextcanvas, maintextcanvas.transform.position, Quaternion.identity);
-			stickbuttonclone = Instantiate(stickbutton, stickbutton.transform.position, stickbutton.transform.rotation);
-			cookbuttonclone = Instantiate(cookbutton, cookbutton.transform.position, Quaternion.identity);
+			canvasclone = Instantiate(maintextcanvas, maintextcanvas.transform.position, Quaternion.identity);         
 			cookButtonText = canvasclone.transform.Find("Cook Text").GetComponent<Text>();
 			stickButtonText = canvasclone.transform.Find("Stick Text").GetComponent<Text>();
+			scoreText = canvasclone.transform.Find("Score Text").GetComponent<Text>();
+			cardDisplayText = canvasclone.transform.Find("Card Name").GetComponent<Text>();
 			handText = canvasclone.transform.Find("Hand Text").GetComponent<Text>();
 			SetCookButtonText();
+			SetStickButtonText();
 			SetHandText();
+			SetCardDisplayText("",0,0);
 
                      
 		}
@@ -143,6 +145,9 @@ public class GameController : MonoBehaviour {
 		/* Initiates sequence of events following end of turn.
            Called whenever a turn-ending action is performed. */
 
+        // Update texts
+		SetHandText(); SetCookButtonText(); SetStickButtonText(); SetScoreText();
+
         // If decay has more than four cards in it, discard.
 		if (Decay.Count == 4) {
 			List<GameObject> DecayCopy = new List<GameObject>(Decay);
@@ -153,9 +158,10 @@ public class GameController : MonoBehaviour {
 			}
 		}
 
-		// Move a card to the decay
+		// Move a card to the decay and make sure it's inactive
         GameObject decayCard = Forest[Forest.Count - 1];
         Decay.Add(decayCard);
+		decayCard.SetActive(false);
 
         // Remove card from forest
         Forest.Remove(decayCard);
@@ -172,13 +178,14 @@ public class GameController : MonoBehaviour {
 		sceneChangeScript = canvasclone.transform.Find("DecayButton").GetComponent<SceneChangeScript>();
 		sceneChangeScript.GetObjects();
 		sceneChangeScript.ToggleInteract(false, true, true, false);
-		canvasclone.transform.Find("DecayButton").GetComponent<Button>().enabled = true;    // Turn back on button
+		//canvasclone.transform.Find("DecayButton").GetComponent<Button>().enabled = true;    // Turn back on button
 
         // Activate the turn button
         canvasclone.transform.Find("TurnButton").gameObject.SetActive(true);
 		// Set text
 		canvasclone.transform.Find("TurnButton").transform.Find("Text").GetComponent<Text>().text = "End Turn";
 
+      
 	}
 
 	public void ChangeTurn() {
@@ -193,8 +200,7 @@ public class GameController : MonoBehaviour {
 
 			Save("Player2");
 			SwitchPlayer("Player1");
-
-
+         
 		}
 
 		else {
@@ -206,7 +212,7 @@ public class GameController : MonoBehaviour {
 
 		}
         
-		SetHandText(); SetCookButtonText(); SetStickButtonText();
+		SetHandText(); SetCookButtonText(); SetStickButtonText(); SetScoreText();
 
 	}
    
@@ -227,40 +233,58 @@ public class GameController : MonoBehaviour {
 		stickButtonText.text = "Trade! x" + stickCount.ToString();
 	}
 
+    public void SetScoreText()
+	{
+		scoreText.text = "Player One: " + score1.ToString() + "\n" + "Player Two: " + score2.ToString();
+	}
 
+	public void SetCardDisplayText(string cardname, int cookpoints, int sticks) {
+
+		if (cardname != "") {
+			cardDisplayText.text = cardname + "\n" + "Cook Points: " + cookpoints.ToString() 
+				+ "\n" + "Sticks: " + sticks.ToString();         
+		}
+
+		else {
+			cardDisplayText.text = "";
+		}
+	}
+    
     /* Functions below used in switching turns */
 
 	void Save(string player) {
+        /* Saves data before switching players */
 
 		if (player == "Player1") {
 
 			Hand1 = Hand; basketCount1 = basketCount; panCount1 = panCount;
-            handLimit1 = handLimit; stickCount1 = stickCount; score1 = score;
+            handLimit1 = handLimit; stickCount1 = stickCount;
 			         
 		}
 
 		else if (player == "Player2") {
 
 			Hand2 = Hand; basketCount2 = basketCount; panCount2 = panCount;
-            handLimit2 = handLimit; stickCount2 = stickCount; score2 = score;
+			handLimit2 = handLimit; stickCount2 = stickCount;
 
 		}
 
 	}
 
 	void SwitchPlayer(string player) {
+        /* Switches active hand / corresponding variables */
 
 		if (player == "Player1") {
 
 			Hand = Hand1; basketCount = basketCount1; panCount = panCount1;
-            handLimit = handLimit1; stickCount = stickCount1; score = score1;
+            handLimit = handLimit1; stickCount = stickCount1;
 
 		}
 
 		else if (player == "Player2") {
 
 			Hand = Hand2; basketCount = basketCount2; panCount = panCount2;
-            handLimit = handLimit2; stickCount = stickCount2; score = score2;
+            handLimit = handLimit2; stickCount = stickCount2;
 
 		}
 

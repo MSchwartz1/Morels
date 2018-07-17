@@ -5,8 +5,7 @@ using UnityEngine.UI;
 
 public class TurnButtonScript : MonoBehaviour {
 
-	bool created = false;
-	GameObject maincanvas;
+	Canvas maincanvas;
 	SceneChangeScript sceneChangeScript;
     GameObject controller;
     GameController gameController;   
@@ -14,16 +13,13 @@ public class TurnButtonScript : MonoBehaviour {
 
 	private void Awake()
 	{
-		if (!created) {
 
-			created = true;
-			buttonPresses = 0;
-			maincanvas = GameObject.Find("MainCanvas(Clone)");
-			controller = GameObject.Find("Controller");
-            gameController = controller.GetComponent<GameController>();
-			sceneChangeScript = maincanvas.transform.Find("DecayButton").GetComponent<SceneChangeScript>();
-
-		}
+	    buttonPresses = 0;
+		controller = GameObject.Find("Controller");
+        gameController = controller.GetComponent<GameController>();
+        maincanvas = gameController.canvasclone;
+		sceneChangeScript = maincanvas.transform.Find("DecayButton").GetComponent<SceneChangeScript>();
+              
 
 	}
 

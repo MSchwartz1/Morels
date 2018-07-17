@@ -9,24 +9,19 @@ public class SceneChangeScript : MonoBehaviour
 
 	// Game Controller
 	GameObject controller;
-	GameController gameController;
-	// Cook Button
-    GameObject cookButton;
-    CookScript cookScript;
-    SpriteRenderer cookRend;
-    // Stick Button
-    GameObject stickButton;
-    StickScript stickScript;
-    SpriteRenderer stickRend;
+	GameController gameController;   
     // Main canvas and associated texts objects and buttons
-    Canvas maincanvas;
+    Canvas maincanvas;   
     Text cookButtonText;
     Text stickButtonText;
+	Text scoreText;
     Transform decayTrans;
+	Transform cookTrans;
+	Transform stickTrans;
     // Day Deck
     GameObject dayDeck;
     SpriteRenderer dayDeckRend;
-    OnClickScript onClickScript;
+    OnClickCardScript onClickCardScript;
 	// Cards
 	SpriteRenderer[] rends;
 
@@ -56,11 +51,7 @@ public class SceneChangeScript : MonoBehaviour
 
 	private void MainScene(bool isEnabled)
 	{
-    
-		// Toggle viewability and interactibility
-		//ToggleView(isEnabled, true, true, false);
-		//ToggleInteract(isEnabled, true, true, false);
-
+   
         // Toggle main scene objects
 		CompletelyOnOff(isEnabled, true, true, false);
 
@@ -69,32 +60,32 @@ public class SceneChangeScript : MonoBehaviour
 	private void DecayScene(bool isEnabled) 
 	{
       
-        // Toggle viewability and interactibility
-        //ToggleView(isEnabled, false, false, true);
-        //ToggleInteract(isEnabled, false, false, true);
-        
+
 		// Toggle decay scene objects
         CompletelyOnOff(isEnabled, false, false, true);
 
 	}
-
+    
 	public void ToggleInteract(bool isEnabled, bool toggleForest, bool toggleHand, bool toggleDecay)
 	{
 		/*  Toggles interactable components of game objects (scripts / buttons) */
-                    
+		cookTrans.GetComponent<CookandTradeScript>().enabled = isEnabled;
+		stickTrans.GetComponent<CookandTradeScript>().enabled = isEnabled;
+
 		if (toggleForest)
 		{
+            
 
-			cookScript.enabled = isEnabled;
-            stickScript.enabled = isEnabled;
-			decayTrans.GetComponent<Button>().enabled = isEnabled;         
-                     
+			decayTrans.GetComponent<Button>().enabled = isEnabled;
+			cookTrans.GetComponent<Button>().enabled = isEnabled;
+			stickTrans.GetComponent<Button>().enabled = isEnabled;
+
 			foreach (GameObject card in gameController.Forest)
 			{
 
 				// Get scripts and disable
-				onClickScript = card.GetComponent<OnClickScript>();
-				onClickScript.enabled = isEnabled;
+				onClickCardScript = card.GetComponent<OnClickCardScript>();
+				onClickCardScript.enabled = isEnabled;
 
 
 			}
@@ -107,8 +98,8 @@ public class SceneChangeScript : MonoBehaviour
             {
 
                 // Get scripts and disable
-                onClickScript = card.GetComponent<OnClickScript>();
-                onClickScript.enabled = isEnabled;
+                onClickCardScript = card.GetComponent<OnClickCardScript>();
+                onClickCardScript.enabled = isEnabled;
 
             }
         }
@@ -119,8 +110,8 @@ public class SceneChangeScript : MonoBehaviour
             {
 
                 // Get scripts and disable
-                onClickScript = card.GetComponent<OnClickScript>();
-                onClickScript.enabled = isEnabled;
+                onClickCardScript = card.GetComponent<OnClickCardScript>();
+                onClickCardScript.enabled = isEnabled;
 
             }
 
@@ -136,13 +127,14 @@ public class SceneChangeScript : MonoBehaviour
 		if (toggleForest) 
 		{
                  
-            cookRend.enabled = isEnabled;
-            stickRend.enabled = isEnabled;
             dayDeckRend.enabled = isEnabled;
             cookButtonText.enabled = isEnabled;
             stickButtonText.enabled = isEnabled;
+			scoreText.enabled = isEnabled;
 			decayTrans.GetComponent<Image>().enabled = isEnabled;
             decayTrans.Find("Text").GetComponent<Text>().enabled = isEnabled;
+			cookTrans.GetComponent<Image>().enabled = isEnabled;
+			stickTrans.GetComponent<Image>().enabled = isEnabled;
 
 			foreach (GameObject card in gameController.Forest) 
 			{
@@ -207,8 +199,6 @@ public class SceneChangeScript : MonoBehaviour
 
 		if (toggleForest) {
 
-			cookButton.SetActive(isEnabled);
-			stickButton.SetActive(isEnabled);
 			dayDeck.SetActive(isEnabled); 
 			maincanvas.gameObject.SetActive(isEnabled);
 
@@ -249,16 +239,13 @@ public class SceneChangeScript : MonoBehaviour
         // Get access to necessary game objects and their components
         controller = GameObject.Find("Controller");
         gameController = controller.GetComponent<GameController>();
-		cookButton = gameController.cookbuttonclone;
-        cookScript = cookButton.GetComponent<CookScript>();
-        cookRend = cookButton.GetComponent<SpriteRenderer>();
-		stickButton = gameController.stickbuttonclone;
-        stickScript = stickButton.GetComponent<StickScript>();
-        stickRend = stickButton.GetComponent<SpriteRenderer>();
-		maincanvas = gameController.canvasclone;
+        maincanvas = gameController.canvasclone;
         cookButtonText = maincanvas.transform.Find("Cook Text").GetComponent<Text>();
         stickButtonText = maincanvas.transform.Find("Stick Text").GetComponent<Text>();
-        decayTrans = maincanvas.transform.Find("DecayButton");
+		scoreText = maincanvas.transform.Find("Score Text").GetComponent<Text>();
+		decayTrans = maincanvas.transform.Find("DecayButton");
+		cookTrans = maincanvas.transform.Find("Cook Button");
+		stickTrans = maincanvas.transform.Find("Stick Button");
 		dayDeck = gameController.daydeckclone;
         dayDeckRend = dayDeck.GetComponent<SpriteRenderer>();
 

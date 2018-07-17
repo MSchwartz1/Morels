@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: bd2c96c2988ca42eda85f36c406f61ae
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - daydeck: {fileID: 1524543556664422, guid: a3dea104dd7c24a688bde4530b89fc55, type: 2}
+  - player1: {fileID: 1049190363942916, guid: 0b03344fb8a124614af7277ac7170e1a, type: 2}
+  - cookbutton: {fileID: 1512297919232702, guid: 372a2ba6018a944bd9d286b0c6d977df,
+      type: 2}
+  - textcanvas: {fileID: 1871875250285946, guid: bb381b72d467249a783d82eded90053c,
+      type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
